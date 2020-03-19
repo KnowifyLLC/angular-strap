@@ -388,18 +388,63 @@ angular.module('mgcrea.ngStrap.tooltip', ['mgcrea.ngStrap.core', 'mgcrea.ngStrap
           // If we're auto placing, we need to check the positioning
           if (autoPlace) {
             var originalPlacement = placement;
+            var isExoticPlacement = originalPlacement.indexOf('-') > 0;
             var viewportPosition = getPosition($tooltip.$viewport);
 
-            if (/bottom/.test(originalPlacement) && elementPosition.bottom + tipHeight > viewportPosition.bottom) {
-              placement = originalPlacement.replace('bottom', 'top');
-            } else if (/top/.test(originalPlacement) && elementPosition.top - tipHeight < viewportPosition.top) {
-              placement = originalPlacement.replace('top', 'bottom');
-            }
+            if (isExoticPlacement) {
+              if (/bottom-/.test(originalPlacement)) {
+                if (clipsBottom(elementPosition, tipHeight, viewportPosition)) {
+                  placement = originalPlacement.replace('bottom', 'top');
+                }
 
-            if (/left/.test(originalPlacement) && elementPosition.left - tipWidth < viewportPosition.left) {
-              placement = placement.replace('left', 'right');
-            } else if (/right/.test(originalPlacement) && elementPosition.right + tipWidth > viewportPosition.width) {
-              placement = placement.replace('right', 'left');
+                if (/right/.test(originalPlacement) && clipsLeft(elementPosition, 0, viewportPosition)) {
+                  placement = placement.replace('right', 'left');
+                } else if (/left/.test(originalPlacement) && clipsRight(elementPosition, 0, viewportPosition)) {
+                  placement = placement.replace('left', 'right');
+                }
+              } else if (/top-/.test(originalPlacement)) {
+                if (clipsTop(elementPosition, tipHeight, viewportPosition)) {
+                  placement = originalPlacement.replace('top', 'bottom');
+                }
+
+                if (/right/.test(originalPlacement) && clipsLeft(elementPosition, 0, viewportPosition)) {
+                  placement = placement.replace('right', 'left');
+                } else if (/left/.test(originalPlacement) && clipsRight(elementPosition, 0, viewportPosition)) {
+                  placement = placement.replace('left', 'right');
+                }
+              } else if (/left-/.test(originalPlacement)) {
+                if (clipsLeft(elementPosition, tipWidth, viewportPosition)) {
+                  placement = originalPlacement.replace('left', 'right');
+                }
+
+                if (/top/.test(originalPlacement) && clipsBottom(elementPosition, 0, viewportPosition)) {
+                  placement = placement.replace('top', 'bottom');
+                } else if (/bottom/.test(originalPlacement) && clipsTop(elementPosition, 0, viewportPosition)) {
+                  placement = placement.replace('bottom', 'top');
+                }
+              } else if (/right-/.test(originalPlacement)) {
+                if (clipsRight(elementPosition, tipWidth, viewportPosition)) {
+                  placement = originalPlacement.replace('right', 'left');
+                }
+
+                if (/top/.test(originalPlacement) && clipsBottom(elementPosition, 0, viewportPosition)) {
+                  placement = placement.replace('top', 'bottom');
+                } else if (/bottom/.test(originalPlacement) && clipsTop(elementPosition, 0, viewportPosition)) {
+                  placement = placement.replace('bottom', 'top');
+                }
+              }
+            } else {
+              if (/bottom/.test(originalPlacement) && clipsBottom(elementPosition, tipHeight, viewportPosition)) {
+                placement = originalPlacement.replace('bottom', 'top');
+              } else if (/top/.test(originalPlacement) && clipsTop(elementPosition, tipHeight, viewportPosition)) {
+                placement = originalPlacement.replace('top', 'bottom');
+              }
+
+              if (/left/.test(originalPlacement) && clipsLeft(elementPosition, tipWidth, viewportPosition)) {
+                placement = placement.replace('left', 'right');
+              } else if (/right/.test(originalPlacement) && clipsRight(elementPosition, tipWidth, viewportPosition)) {
+                placement = placement.replace('right', 'left');
+              }
             }
 
             tipElement.removeClass(originalPlacement).addClass(placement);
@@ -510,6 +555,22 @@ angular.module('mgcrea.ngStrap.tooltip', ['mgcrea.ngStrap.core', 'mgcrea.ngStrap
 
         function stopEventPropagation (event) {
           event.stopPropagation();
+        }
+
+        function clipsTop (elPos, tipDim, viewPos) {
+          return elPos.top - tipDim < viewPos.top;
+        }
+
+        function clipsRight (elPos, tipDim, viewPos) {
+          return elPos.right + tipDim > viewPos.width;
+        }
+
+        function clipsBottom (elPos, tipDim, viewPos) {
+          return elPos.bottom + tipDim > viewPos.bottom;
+        }
+
+        function clipsLeft (elPos, tipDim, viewPos) {
+          return elPos.left - tipDim < viewPos.left;
         }
 
         // Private methods
